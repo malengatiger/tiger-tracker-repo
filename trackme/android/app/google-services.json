@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "43856483662",
+    "firebase_url": "https://trackme-tiger.firebaseio.com",
+    "project_id": "trackme-tiger",
+    "storage_bucket": "trackme-tiger.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:43856483662:android:22937af5c2b0df45",
+        "android_client_info": {
+          "package_name": "com.tiger.trackme"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "43856483662-i13njv9kcqii17rft6tdonpl0n2es0jk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwo2w-jW1h6mv676RZjmLlTEUnmVc81oY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "43856483662-i13njv9kcqii17rft6tdonpl0n2es0jk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
