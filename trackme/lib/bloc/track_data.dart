@@ -6,14 +6,14 @@
 class TrackData {
   double latitude;
   double longitude;
-  String created;
+  String created, comment, userID;
   dynamic address, event, location;
   dynamic position, places;
 
   TrackData({
     this.latitude,
     this.longitude,
-    this.address,
+    this.address, this.comment, this.userID,
     this.position, this.places, this.event, this.location,
     this.created,
   });
@@ -26,6 +26,8 @@ class TrackData {
     this.position = data['position'];
     this.places = data['places'];
     this.event = data['event'];
+    this.userID = data['userID'];
+    this.comment = data['comment'];
     this.location = data['location'];
   }
 
@@ -35,10 +37,17 @@ class TrackData {
     map['latitude'] = latitude;
     map['longitude'] = longitude;
     map['created'] = created;
-    map['places'] = places;
-    map['address'] = address;
+    map['userID'] = userID;
+
+    if (address != null) {
+      map['address'] = address;
+    }
     map['event'] = event;
     map['location'] = location;
+
+    if (comment != null) {
+      map['comment'] = comment;
+    }
 
     if (places != null) map['places'] = places;
     if (position != null) map['position'] = position;

@@ -1,4 +1,5 @@
 library date_symbol_data_local;
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:trackme/bloc/track_data.dart';
@@ -6,8 +7,6 @@ import 'package:trackme/bloc/tracker_bloc.dart';
 import 'package:trackme/ui/slide.dart';
 
 import 'map.dart';
-
-
 
 class TrackList extends StatefulWidget {
   final List<TrackData> tracks;
@@ -22,10 +21,16 @@ class _TrackListState extends State<TrackList> {
   List<TrackData> _tracks = List();
   @override
   void initState() {
-    debugPrint('🍎 🍎 🍎 🍎 🍎 🍎 🍎  initState -  geTracks');
+    debugPrint(
+        '\n\n\n🍎 🍎 🍎 TrackList: 🍎 🍎 🍎 🍎  initState -  getTracks\n\n');
     super.initState();
+    _getData();
+  }
+
+  void _getData() async {
     if (widget.tracks == null || widget.tracks.isEmpty) {
-      trackerBloc.getTracks();
+      debugPrint(' 🧩🧩 widget tracks isEmpty or  Null');
+      _tracks = await trackerBloc.getTracks();
     } else {
       _tracks = widget.tracks;
     }
@@ -33,28 +38,38 @@ class _TrackListState extends State<TrackList> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Tiger Tracks'),
-        backgroundColor: Colors.indigo[400],
-      ),
-      backgroundColor: Colors.brown[100],
-      body: StreamBuilder<List<TrackData>>(
-          stream: trackerBloc.trackStream,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              _tracks = snapshot.data;
-              _tracks.sort((a, b) => b.created.compareTo(a.created));
-            }
-            return ListView.builder(
-              itemBuilder: (BuildContext context, int index) {
-                if (_tracks.isEmpty) {
-                  return Container();
-                }
-                var lat = _tracks.elementAt(index).latitude;
-                var lng = _tracks.elementAt(index).longitude;
+    return StreamBuilder<List<TrackData>>(
+        stream: trackerBloc.trackStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            _tracks = snapshot.data;
+          }
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Tiger Tracks'),
+              elevation: 16,
+              backgroundColor: Colors.indigo[300],
+              bottom: PreferredSize(
+                preferredSize: Size.fromHeight(80),
+                child: Column(
+                  children: <Widget>[
+                    Text(
+                      'Tap to go to a place you have been before.',
+                      style: TextStyle(color: Colors.white, fontSize: 14),
+                    ),
+                    SizedBox(
+                      height: 40,
+                    )
+                  ],
+                ),
+              ),
+            ),
+            backgroundColor: Colors.brown[100],
+            body: ListView.builder(
+              itemCount: _tracks.length,
+              itemBuilder: (context, index) {
                 return Padding(
-                  padding: const EdgeInsets.only(left: 20.0, right: 20),
+                  padding: const EdgeInsets.only(left: 8.0, right: 8),
                   child: GestureDetector(
                     onTap: () {
                       _navToPlace(_tracks.elementAt(index));
@@ -62,38 +77,33 @@ class _TrackListState extends State<TrackList> {
                     child: Card(
                       elevation: 2,
                       child: Padding(
-                        padding: const EdgeInsets.all(12.0),
+                        padding: const EdgeInsets.all(8.0),
                         child: Row(
                           children: <Widget>[
                             Container(
-                              width: 60,
-                              child: Text(
-                                '${_tracks.length - index}',
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.indigo[300]),
-                              ),
+                                width: 40,
+                                child: Text(
+                                  '${_tracks.length - index}',
+                                  style: TextStyle(
+                                      color: Colors.grey[400],
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w900),
+                                )),
+                            SizedBox(
+                              width: 8,
                             ),
                             Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
                               children: <Widget>[
                                 Text(
                                   '${getFormattedDateShortWithTime(_tracks.elementAt(index).created)}',
                                   style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w900,
-                                      color: Colors.black),
+                                      fontWeight: FontWeight.w900, fontSize: 20),
                                 ),
-                                Row(
-                                  children: <Widget>[
-                                    Text('${getFormattedDouble(lat)}'),
-                                    SizedBox(
-                                      width: 8,
-                                    ),
-                                    Text('${getFormattedDouble(lng)}'),
-                                  ],
+                                SizedBox(
+                                  height: 8,
                                 ),
+                                Text(
+                                    '${getFormattedDouble(_tracks.elementAt(index).latitude)} ${getFormattedDouble(_tracks.elementAt(index).longitude)}'),
                               ],
                             ),
                           ],
@@ -103,9 +113,9 @@ class _TrackListState extends State<TrackList> {
                   ),
                 );
               },
-            );
-          }),
-    );
+            ),
+          );
+        });
   }
 
   String getFormattedDouble(double number) {
@@ -123,6 +133,7 @@ class _TrackListState extends State<TrackList> {
 
     return oCcy.format(number);
   }
+
   String getFormattedDateShortWithTime(String date) {
     Locale myLocale = Localizations.localeOf(context);
 
@@ -136,12 +147,11 @@ class _TrackListState extends State<TrackList> {
     }
   }
 
-
-
   void _navToPlace(TrackData data) {
-
-    Navigator.push(context, SlideRightRoute(
-      widget: PlaceMap(data),
-    ));
+    Navigator.push(
+        context,
+        SlideRightRoute(
+          widget: PlaceMap(data),
+        ));
   }
 }

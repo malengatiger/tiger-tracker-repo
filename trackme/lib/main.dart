@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:trackme/bloc/track_data.dart';
 import 'package:trackme/bloc/tracker_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:trackme/ui/comment.dart';
 import 'package:trackme/ui/slide.dart';
 import 'package:trackme/ui/track_list.dart';
 
@@ -19,6 +20,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.pink,
+        accentColor: Colors.orangeAccent,
+        fontFamily: 'Raleway'
       ),
       home: MyHomePage(),
     );
@@ -76,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
           }
           return Scaffold(
             appBar: AppBar(
-              title: Text('Tiger Tracks'),
+              title: Text('Tiger Tracks',style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)),
               backgroundColor: Colors.orange[600],
             ),
             body: Stack(
@@ -96,6 +99,16 @@ class _MyHomePageState extends State<MyHomePage> {
                         '🔆 🔆 🔆 🔆 🔆 🔆 onMapCreated ... markersMap ...  🔆 🔆 🔆 🔆 ');
                     _completer.complete(_mapController);
                     _setMarkers();
+                  },
+//                  onTap: (latLng) {
+//                    Navigator.push(context, SlideRightRoute(
+//                      widget: Commenter(latLng),
+//                    ));
+//                  },
+                  onLongPress: (latLng) {
+                    Navigator.push(context, SlideRightRoute(
+                      widget: Commenter(latLng),
+                    ));
                   },
                 ),
                 Positioned(

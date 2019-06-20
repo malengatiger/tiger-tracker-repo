@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:trackme/bloc/track_data.dart';
 import 'package:trackme/bloc/tracker_bloc.dart';
+import 'package:trackme/ui/slide.dart';
 
 import '../main.dart';
+import 'comment.dart';
 
 class PlaceMap extends StatefulWidget {
   final TrackData trackData;
@@ -107,6 +109,7 @@ class _PlaceMapState extends State<PlaceMap> {
             zoomGesturesEnabled: true,
             rotateGesturesEnabled: true,
             scrollGesturesEnabled: true,
+            myLocationEnabled: true,
             mapType: mapType == null ? MapType.hybrid : mapType,
             onMapCreated: (controller) {
               debugPrint(
@@ -114,6 +117,16 @@ class _PlaceMapState extends State<PlaceMap> {
               _completer.complete(controller);
               _mapController = controller;
               _setMarkers();
+            },
+            onTap: (latLng) {
+              Navigator.push(context, SlideRightRoute(
+                widget: Commenter(latLng),
+              ));
+            },
+            onLongPress: (latLng) {
+              Navigator.push(context, SlideRightRoute(
+                widget: Commenter(latLng),
+              ));
             },
           ),
           Positioned(
