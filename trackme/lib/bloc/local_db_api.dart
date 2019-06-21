@@ -69,7 +69,7 @@ class LocalDBAPI {
     return res;
   }
 
-  static Future<List<TrackData>> getTracks({@required String userID}) async {
+  static Future<List<TrackData>> getTracks(String userID) async {
     await _connectToLocalDB();
     Carrier carrier = Carrier(db: DATABASE, collection: 'tracks', query: {
       'eq': {
@@ -81,6 +81,19 @@ class LocalDBAPI {
     res.forEach((r) {
       list.add(TrackData.fromJson(r=json.decode(r)));
     });
+    list.sort((a,b) => b.created.compareTo(a.created));
+    debugPrint('🧩🧩 ${list.length}  🧩🧩 tracks found on local database  🧩🧩');
+    return list;
+  }
+  static Future<List<TrackData>> getAllTracks() async {
+    await _connectToLocalDB();
+    Carrier carrier = Carrier(db: DATABASE, collection: 'tracks');
+    var res = await MongodbMobile.getAll(carrier);
+    List<TrackData> list = List();
+    res.forEach((r) {
+      list.add(TrackData.fromJson(r=json.decode(r)));
+    });
+    list.sort((a,b) => b.created.compareTo(a.created));
     debugPrint('🧩🧩 ${list.length}  🧩🧩 tracks found on local database  🧩🧩');
     return list;
   }

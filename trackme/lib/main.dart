@@ -6,8 +6,11 @@ import 'package:trackme/bloc/track_data.dart';
 import 'package:trackme/bloc/tracker_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:trackme/ui/comment.dart';
+import 'package:trackme/ui/signin.dart';
 import 'package:trackme/ui/slide.dart';
 import 'package:trackme/ui/track_list.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 
 void main() => runApp(MyApp());
 
@@ -48,10 +51,21 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _getTracks();
+    _checkAuth();
   }
 
   TrackData lastTrack;
+  void _checkAuth() async {
+    bool isOK = await trackerBloc.checkAuthorization();
+    if (!isOK) {
+      Navigator.push(context, SlideRightRoute(
+        widget: SignIn(),
+      ));
+    } else {
+      await trackerBloc.initialize();
+      _getTracks();
+    }
+  }
   void _getTracks() async {
     _tracks = await trackerBloc.getTracks();
     _tracks.sort((a,b) => b.created.compareTo(a.created));
@@ -79,8 +93,25 @@ class _MyHomePageState extends State<MyHomePage> {
           }
           return Scaffold(
             appBar: AppBar(
-              title: Text('Tiger Tracks',style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)),
+              title: Text('Tiger Tracker',style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900)),
               backgroundColor: Colors.orange[600],
+              bottom: PreferredSize(
+                preferredSize: Size.fromHeight(40),
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(left:20.0),
+                      child: Row(
+                        children: <Widget>[
+                          Text(trackerBloc.email == null?'Tiger Tracks': trackerBloc.email,
+                              style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.normal)),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20,)
+                  ],
+                ),
+              ),
             ),
             body: Stack(
               children: <Widget>[
@@ -160,8 +191,6 @@ class _MyHomePageState extends State<MyHomePage> {
         });
   }
 
-
-
   void _setMarkers() async {
     debugPrint(
         '\n\n🔆🔆🔆 📍 📍 📍 📍 setMarkers: points on map: 🌀🌀 ${_tracks.length} points  🌀🌀\n\n');
@@ -185,11 +214,12 @@ class _MyHomePageState extends State<MyHomePage> {
               onTap: () {
                 debugPrint(
                     ' 🧩 🧩 🧩 POINT infoWindow tapped  🧩 🧩 🧩 ${m.created}');
+                launchMapsUrl(m.latitude, m.longitude);
               }));
       _markers.add(marker);
     });
 
-    lastTrack = _tracks.last;
+    lastTrack = _tracks.first;
     _moveCamera(lastTrack.latitude, lastTrack.longitude);
   }
 
@@ -225,6 +255,7 @@ String getFormattedDateHourMin(String date) {
     return format.format(d);
   }
 }
+
 String getFormattedDate(String date) {
   try {
     DateTime d = DateTime.parse(date);
@@ -234,5 +265,19 @@ String getFormattedDate(String date) {
     DateTime d = DateTime.now();
     var format = new DateFormat.Hm();
     return format.format(d);
+  }
+}
+//Sg55CHHMCsBzSxi
+//2676 873 485
+//7957 315 307
+
+void launchMapsUrl(double lat, double lon) async {
+  debugPrint('\n\n🏀 🏀 launchMapsUrl 🏀 🏀   🌀🌀 $lat   🌀🌀 $lon');
+  final url = 'https://www.google.com/maps/search/?api=1&query=$lat,$lon';
+  debugPrint('\n\n🏀 🏀 launchMapsUrl 🏀 🏀   🌀🌀  $url   🌀🌀 ');
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    throw 'Could not launch $url';
   }
 }

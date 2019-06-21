@@ -32,28 +32,52 @@ class TrackerBloc {
   FirebaseUser user;
 
   Stream get trackStream => _trackController.stream;
+  String get email => user == null? null : user.email;
+
   close() {
     _trackController.close();
   }
 
-  Future _authorize() async {
-    debugPrint('🔑 check auth user status ..... ');
+  Future<bool> checkAuthorization() async {
+    debugPrint('🔑 checkAuthorization: check auth user status ..... ');
     user = await _auth.currentUser();
     if (user == null) {
-      debugPrint(
-          '🔑 🔑 🔑 🔑 🔑 _authorize: signInAnonymously: 🔑 🔑 🔑 🔑 🔑 ');
-      await _auth.signInAnonymously();
-      user = await _auth.currentUser();
+      return false;
     }
     debugPrint(
-        '🔑 🔑 🔑 🔑 🔑 _authorized: user uid: 🌺 ${user.uid}: 🌺  🔑 🔑 🔑 🔑 🔑 ');
+        '🔑 🔑 🔑 🔑 🔑 checkAuthorization: user uid: 🌺 ${user.uid}: 🌺  🔑 🔑 🔑 🔑 🔑 ');
+    return true;
+  }
+
+  Future signIn({String email, String password}) async {
+    debugPrint('🌀🌀🌀🌀 trackerBloc: signIn .........');
+    try {
+      user =
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
+      debugPrint('🌀🌀🌀🌀  signInWithEmailAndPassword  👌👌👌 user uid: 🔑 ${user.uid} 🔑 🌀🌀');
+    } catch (e) {
+      print(e);
+      print('👿 👿 👿 👿 👿 👿 👿  user not found: 👿  $email 👿  $password');
+      throw Exception('👿 👿 👿 👿 👿 👿 User not found');
+    }
+    return user;
+  }
+  Future register({String email, String password}) async {
+    debugPrint('🌀🌀🌀🌀 trackerBloc: signIn .........');
+    try {
+      user =  await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      debugPrint('🌀🌀🌀🌀 createUserWithEmailAndPassword OK: 🔑 ${user.uid} 🔑  👌👌👌');
+      return user;
+    } catch (e) {
+      print(e);
+      throw e;
+    }
     return user;
   }
 
   initialize() async {
     debugPrint(
         '\n\n 🔆 🔆 🔆 🔆 🔆 🔆 🔆 TrackerBloc: 💜 initialize and auth ...');
-    await _authorize();
     bg.BackgroundGeolocation.onLocation((bg.Location location) {
       _onLocation(location);
     });
@@ -81,6 +105,8 @@ class TrackerBloc {
         enableHeadless: true,
         url: url,
         reset: true,
+        forceReloadOnBoot: true,
+        foregroundService: true,
         schedule: [
           '1-7 1:00-23:59', // Sun-Sat: 1:00am to 12:00am all day
         ])).then((bg.State state) {
@@ -95,22 +121,27 @@ class TrackerBloc {
     });
   }
 
+  //tiger: tiger3033 tiger.malenga@gmail.com
+  //me aubrey@aftarobot.com yebo003
   Future<List<TrackData>> getTracks() async {
-    if (user == null) {
-      await _authorize();
-    }
-    debugPrint('\n🧩🧩 getting all tracks ....');
 
-    _trackData = await LocalDBAPI.getTracks(userID: user.uid);
-//    var qs = await fs
-//        .collection('tracks')
-//        .document(user.uid)
-//        .collection('points')
-//        .getDocuments();
-//    _trackData.clear();
-//    qs.documents.forEach((doc) {
-//      _trackData.add(TrackData.fromJson(doc.data));
-//    });
+    debugPrint('\n🧩🧩 getting all tracks ....');
+    _trackData = await LocalDBAPI.getAllTracks();
+    if (_trackData.isEmpty) {
+      debugPrint('\n🧩🧩  🔆🔆🔆 local db is empty, refreshing from remote db....  🔆🔆🔆');
+      var qs = await fs
+          .collection('tracks')
+          .document(user.uid)
+          .collection('points')
+          .getDocuments();
+      _trackData.clear();
+      qs.documents.forEach((doc) {
+        _trackData.add(TrackData.fromJson(doc.data));
+      });
+      for (var t in _trackData) {
+        await LocalDBAPI.addTrack(track: t);
+      }
+    }
     _trackData.sort((a, b) => b.created.compareTo(a.created));
     _trackController.sink.add(_trackData);
     debugPrint(
@@ -125,8 +156,6 @@ class TrackerBloc {
       track.location = bLoc.toString();
       track.userID = user.uid;
       await LocalDBAPI.addTrack(track: track);
-//      var res = await LocalDBAPI.getTracks(userID: user.uid);
-//      debugPrint('🐙 🐙 ${res.length} 🐙 🐙  tracks in local Mongo : 🌀🌀 ${DateTime.now().toIso8601String()}');
     } catch (e) {
       debugPrint(
           '🐙 🐙 🐙 🐙 🐙 🐙 🐙 we fucked, Hank! 🐙 🐙 🐙 🐙 🐙  mongo mobile fell down? ... fuck!!');
@@ -152,6 +181,8 @@ class TrackerBloc {
       return null;
     }
   }
+
+  static const TIGER = 'iYQcwxmGEde61xd74Pc8hnUcA1v2', AUBREY = 'o7b2ZKqZO4WHyenGjnW14XvHZWy2';
 
   _getStuff() {
     //      var loc = webService.Location(data.latitude, data.longitude);
@@ -224,6 +255,6 @@ class TrackerBloc {
   }
 
   TrackerBloc() {
-    initialize();
+    //initialize();
   }
 }
