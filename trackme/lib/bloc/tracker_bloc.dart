@@ -6,11 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_background_geolocation/flutter_background_geolocation.dart'
     as bg;
 import 'package:flutter_background_geolocation/flutter_background_geolocation.dart';
-import 'package:google_maps_webservice/geocoding.dart' as webService;
 import 'package:trackme/bloc/local_db_api.dart';
 import 'package:trackme/bloc/track_data.dart';
-import "package:google_maps_webservice/geocoding.dart";
-import "package:google_maps_webservice/places.dart";
 
 TrackerBloc trackerBloc = TrackerBloc();
 
@@ -21,8 +18,8 @@ class TrackerBloc {
       url = 'http://tracker.transistorsoft.com/locations/tigertracks';
 
   static const kGoogleApiKey = "AIzaSyAZyHg_Z_CGZ-mCgTRuQpouY6jVwM3Mf-A";
-  final geocoding = new GoogleMapsGeocoding(apiKey: kGoogleApiKey);
-  final places = new GoogleMapsPlaces(apiKey: kGoogleApiKey);
+//  final geocoding = new GoogleMapsGeocoding(apiKey: kGoogleApiKey);
+//  final places = new GoogleMapsPlaces(apiKey: kGoogleApiKey);
   final Firestore fs = Firestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -206,6 +203,14 @@ class TrackerBloc {
   }
 
   TrackData prevLocation;
+  Future<bg.Location> getCurrentLocation() async {
+    var loc = await bg.BackgroundGeolocation.getCurrentPosition(
+      samples: 1,
+      desiredAccuracy: 10,
+      persist: true,
+    );
+    return loc;
+  }
   void _onLocation(bg.Location location) {
     debugPrint('\n\n🏀 🏀 🏀 _onLocation fired: $location');
 

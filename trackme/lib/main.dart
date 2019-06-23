@@ -198,9 +198,12 @@ class _MyHomePageState extends State<MyHomePage> {
     _tracks.sort((a,b) => b.created.compareTo(a.created));
     var cnt = 0;
     _tracks.forEach((m) {
+      var title = '#${_tracks.length - cnt} 🖍️ ${getFormattedDate(m.created)},  ${getFormattedDateHourMin(m.created)}';
+      var snip = '${m.event}';
+      if (m.comment != null) {
+        snip = m.comment;
+      }
       cnt++;
-      var title = 'Point #$cnt  ❤️  ${m.created}';
-      var snip = '${m.created}';
       var marker = Marker(
           onTap: () {
               debugPrint('🌀🌀 🌀🌀 marker tapped ${m.latitude} ${m.longitude}');

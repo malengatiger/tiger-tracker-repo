@@ -52,17 +52,21 @@ class _PlaceMapState extends State<PlaceMap> {
   }
 
   _setMarkers() {
+    debugPrint('PlaceMap: setMarkers .........');
     var icon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed);
-
+    var title = '🖍️ ${getFormattedDate(widget.trackData.created)},  ${getFormattedDateHourMin(widget.trackData.created)}';
+    var snip = '${widget.trackData.event}';
+    if (widget.trackData.comment != null) {
+      snip = widget.trackData.comment;
+    }
+    markers.clear();
     markers.add(Marker(
         markerId: MarkerId(DateTime.now().toIso8601String()),
         position: LatLng(widget.trackData.latitude, widget.trackData.longitude),
         icon: icon,
         infoWindow: InfoWindow(
-            title:
-                '${getFormattedDate(widget.trackData.created)} ${getFormattedDateHourMin(widget.trackData.created)}',
-            snippet:
-                '${widget.trackData.latitude} ${widget.trackData.longitude}')));
+            title:title,
+            snippet:snip)));
 
     _mapController.animateCamera(CameraUpdate.newLatLngZoom(
         LatLng(widget.trackData.latitude, widget.trackData.longitude), 14.5));
@@ -88,7 +92,7 @@ class _PlaceMapState extends State<PlaceMap> {
               SizedBox(
                 height: 8,
               ),
-              Text('${widget.trackData.latitude} ${widget.trackData.longitude}',
+              Text(widget.trackData.comment == null? '${widget.trackData.latitude} ${widget.trackData.longitude}' : widget.trackData.comment,
                   style: TextStyle(
                       fontWeight: FontWeight.normal,
                       color: Colors.white,
